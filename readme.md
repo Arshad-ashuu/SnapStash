@@ -1,4 +1,5 @@
-# 📁 DocVault
+![Portfolio](https://img.shields.io/badge/Portfolio-black)
+# 📁 SnapStash 
 
 A modern, secure document management application built with React Native and Expo. Organize your documents, manage sections, and keep everything in one place with a beautiful dark-themed interface.
 
