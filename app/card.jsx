@@ -1,23 +1,27 @@
-import { View, Text, StyleSheet, TouchableOpacity, ScrollView, Modal, TextInput, Image, Animated } from 'react-native'
+import { View, Text, StyleSheet, TouchableOpacity, ScrollView, Modal, TextInput, Image, Animated, ActivityIndicator, Alert } from 'react-native'
 import React, { useState, useRef, useEffect } from 'react'
 import { SafeAreaView } from 'react-native-safe-area-context'
 import { useLocalSearchParams, router } from 'expo-router'
 import { LinearGradient } from 'expo-linear-gradient'
 import { Ionicons } from '@expo/vector-icons'
 import * as ImagePicker from 'expo-image-picker'
+import { getCards, addCard, getCurrentUser } from '../services/supabaseService'
+import { uploadImage } from '../services/storageService'
 
 export default function Card() {
   const { title, icon, sectionId } = useLocalSearchParams()
   
-  const [cards, setCards] = useState([
-    { id: 1, name: 'Passport', images: [], type: 'document' },
-    { id: 2, name: 'Insurance Card', images: [], type: 'card' },
-  ])
-  
+  const [cards, setCards] = useState([])
+  const [loading, setLoading] = useState(true)
   const [modalVisible, setModalVisible] = useState(false)
   const [newCardName, setNewCardName] = useState('')
   const [selectedImages, setSelectedImages] = useState([])
+  const [uploading, setUploading] = useState(false)
   const scaleAnim = useRef(new Animated.Value(0)).current
+
+  useEffect(() => {
+    loadCards()
+  }, [sectionId])
 
   useEffect(() => {
     if (modalVisible) {
@@ -32,11 +36,24 @@ export default function Card() {
     }
   }, [modalVisible])
 
+  const loadCards = async () => {
+    try {
+      setLoading(true)
+      const data = await getCards(sectionId)
+      setCards(data || [])
+    } catch (error) {
+      console.error('Error loading cards:', error)
+      Alert.alert('Error', 'Failed to load documents')
+    } finally {
+      setLoading(false)
+    }
+  }
+
   const pickImages = async () => {
     const result = await ImagePicker.launchImageLibraryAsync({
       mediaTypes: ImagePicker.MediaTypeOptions.Images,
       allowsMultipleSelection: true,
-      quality: 1,
+      quality: 0.8,
     })
 
     if (!result.canceled) {
@@ -44,17 +61,46 @@ export default function Card() {
     }
   }
 
-  const addCard = () => {
-    if (newCardName.trim()) {
-      setCards([...cards, { 
-        id: Date.now(), 
-        name: newCardName, 
-        images: selectedImages,
+  const handleAddCard = async () => {
+    if (!newCardName.trim()) {
+      Alert.alert('Error', 'Please enter a document name')
+      return
+    }
+
+    try {
+      setUploading(true)
+      const user = await getCurrentUser()
+      
+      // Upload images to Supabase Storage
+      const uploadedImageUrls = []
+      for (const imageUri of selectedImages) {
+        const publicUrl = await uploadImage(imageUri, user.id)
+        uploadedImageUrls.push(publicUrl)
+      }
+
+      // Create card in database
+      const cardData = {
+        name: newCardName,
+        images: uploadedImageUrls,
         type: 'document'
-      }])
+      }
+
+      const newCard = await addCard(sectionId, cardData)
+      
+      // Update local state
+      setCards([newCard, ...cards])
+      
+      // Reset form
       setNewCardName('')
       setSelectedImages([])
       setModalVisible(false)
+      
+      Alert.alert('Success', 'Document added successfully!')
+    } catch (error) {
+      console.error('Error adding card:', error)
+      Alert.alert('Error', 'Failed to add document. Please try again.')
+    } finally {
+      setUploading(false)
     }
   }
 
@@ -65,9 +111,26 @@ export default function Card() {
         cardId: card.id,
         cardName: card.name,
         sectionTitle: title,
-        images: JSON.stringify(card.images)
+        sectionId: sectionId,
+        images: JSON.stringify(card.images || [])
       }
     })
+  }
+
+  if (loading) {
+    return (
+      <LinearGradient
+        colors={['#1e1b4b', '#312e81', '#4c1d95']}
+        style={styles.gradient}
+      >
+        <SafeAreaView style={styles.container}>
+          <View style={styles.loadingContainer}>
+            <ActivityIndicator size="large" color="#8b5cf6" />
+            <Text style={styles.loadingText}>Loading documents...</Text>
+          </View>
+        </SafeAreaView>
+      </LinearGradient>
+    )
   }
 
   return (
@@ -121,7 +184,7 @@ export default function Card() {
                     <View style={styles.cardMeta}>
                       <Ionicons name="image-outline" size={14} color="#94a3b8" />
                       <Text style={styles.cardSubtext}>
-                        {card.images.length} {card.images.length === 1 ? 'image' : 'images'}
+                        {card.images?.length || 0} {(card.images?.length || 0) === 1 ? 'image' : 'images'}
                       </Text>
                     </View>
                   </View>
@@ -160,7 +223,7 @@ export default function Card() {
           animationType="fade"
           transparent={true}
           visible={modalVisible}
-          onRequestClose={() => setModalVisible(false)}
+          onRequestClose={() => !uploading && setModalVisible(false)}
         >
           <View style={styles.modalOverlay}>
             <Animated.View 
@@ -183,6 +246,7 @@ export default function Card() {
                   <TouchableOpacity 
                     onPress={() => setModalVisible(false)}
                     style={styles.closeButton}
+                    disabled={uploading}
                   >
                     <Ionicons name="close" size={24} color="#94a3b8" />
                   </TouchableOpacity>
@@ -196,10 +260,15 @@ export default function Card() {
                     placeholderTextColor="#64748B"
                     value={newCardName}
                     onChangeText={setNewCardName}
+                    editable={!uploading}
                   />
                 </View>
 
-                <TouchableOpacity style={styles.imageButton} onPress={pickImages}>
+                <TouchableOpacity 
+                  style={styles.imageButton} 
+                  onPress={pickImages}
+                  disabled={uploading}
+                >
                   <LinearGradient
                     colors={['rgba(139, 92, 246, 0.1)', 'rgba(99, 102, 241, 0.1)']}
                     style={styles.imageButtonGradient}
@@ -238,22 +307,30 @@ export default function Card() {
                   <TouchableOpacity 
                     style={styles.cancelButton} 
                     onPress={() => setModalVisible(false)}
+                    disabled={uploading}
                   >
                     <Text style={styles.cancelButtonText}>Cancel</Text>
                   </TouchableOpacity>
                   <TouchableOpacity 
                     style={styles.addButtonModal} 
-                    onPress={addCard}
+                    onPress={handleAddCard}
                     activeOpacity={0.9}
+                    disabled={uploading}
                   >
                     <LinearGradient
-                      colors={['#8b5cf6', '#6366f1']}
+                      colors={uploading ? ['#64748b', '#475569'] : ['#8b5cf6', '#6366f1']}
                       start={{ x: 0, y: 0 }}
                       end={{ x: 1, y: 0 }}
                       style={styles.addButtonGradient}
                     >
-                      <Ionicons name="checkmark" size={20} color="#fff" />
-                      <Text style={styles.addButtonText}>Add Document</Text>
+                      {uploading ? (
+                        <ActivityIndicator size="small" color="#fff" />
+                      ) : (
+                        <Ionicons name="checkmark" size={20} color="#fff" />
+                      )}
+                      <Text style={styles.addButtonText}>
+                        {uploading ? 'Adding...' : 'Add Document'}
+                      </Text>
                     </LinearGradient>
                   </TouchableOpacity>
                 </View>
@@ -272,6 +349,17 @@ const styles = StyleSheet.create({
   },
   container: {
     flex: 1,
+  },
+  loadingContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    gap: 16,
+  },
+  loadingText: {
+    color: 'rgba(255, 255, 255, 0.7)',
+    fontSize: 16,
+    fontWeight: '600',
   },
   header: {
     flexDirection: 'row',

@@ -59,7 +59,7 @@ Before you begin, ensure you have the following installed:
 1. **Clone the repository**
    ```bash
    git clone <your-repo-url>
-   cd docvault
+   cd SnapStash
    ```
 
 2. **Install dependencies**
@@ -88,7 +88,7 @@ Before you begin, ensure you have the following installed:
 ## 📁 Project Structure
 
 ```
-docvault/
+SnapStash/
 ├── app/
 │   ├── (auth)/           → Authentication screens
 │   ├── (tabs)/           → Main application tabs

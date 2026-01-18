@@ -1,9 +1,9 @@
 {
   "expo": {
-    "name": "Docvault",
-    "slug": "Docvault",
+    "name": "SnapStash",
+    "slug": "SnapStash",
     "version": "1.0.0",
-    "scheme": "docvault",
+    "scheme": "SnapStash",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "light",
@@ -14,20 +14,37 @@
       "backgroundColor": "#ffffff"
     },
     "ios": {
-      "supportsTablet": true
+      "supportsTablet": true,
+      "infoPlist": {
+        "NSPhotoLibraryUsageDescription": "Allow SnapStash to save images to your photo library.",
+        "NSPhotoLibraryAddUsageDescription": "Allow SnapStash to save images to your photo library."
+      }
     },
     "android": {
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#ffffff"
       },
+      "permissions": [
+        "READ_EXTERNAL_STORAGE",
+        "WRITE_EXTERNAL_STORAGE",
+        "READ_MEDIA_IMAGES"
+      ],
       "edgeToEdgeEnabled": true
     },
     "web": {
       "favicon": "./assets/favicon.png"
     },
     "plugins": [
-      "expo-router"
+      "expo-router",
+      [
+        "expo-media-library",
+        {
+          "photosPermission": "Allow SnapStash to save photos to your gallery.",
+          "savePhotosPermission": "Allow SnapStash to save photos to your gallery.",
+          "isAccessMediaLocationEnabled": true
+        }
+      ]
     ]
   }
 }

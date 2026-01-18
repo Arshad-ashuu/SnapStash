@@ -68,7 +68,7 @@ export default function Home() {
     loadSections()
   }
 
-  const addSection = async () => {
+  const handleAddSection = async () => {
     if (!newSection.trim()) {
       Alert.alert('Error', 'Please enter a section name')
       return
@@ -103,7 +103,7 @@ export default function Home() {
     }
   }
 
-  const deleteSection = async (sectionId) => {
+  const handleDeleteSection = async (sectionId) => {
     try {
       const { error } = await supabase
         .from('sections')
@@ -134,13 +134,13 @@ export default function Home() {
   const handleCardLongPress = (section) => {
     Alert.alert(
       'Delete Section',
-      `Delete "${section.title}"?`,
+      `Delete "${section.title}"? This will also delete all documents in this section.`,
       [
         { text: 'Cancel', style: 'cancel' },
         {
           text: 'Delete',
           style: 'destructive',
-          onPress: () => deleteSection(section.id)
+          onPress: () => handleDeleteSection(section.id)
         }
       ]
     )
@@ -164,8 +164,7 @@ export default function Home() {
 
   return (
     <LinearGradient
-                  colors={['#1e1b4b', '#0c0c21']}
-
+      colors={['#1e1b4b', '#0c0c21']}
       style={styles.gradient}
     >
       <SafeAreaView style={styles.container}>
@@ -200,12 +199,12 @@ export default function Home() {
                   placeholderTextColor='#64748B'
                   value={newSection}
                   onChangeText={setNewSection}
-                  onSubmitEditing={addSection}
+                  onSubmitEditing={handleAddSection}
                 />
               </View>
               <TouchableOpacity 
                 style={styles.addButton} 
-                onPress={addSection}
+                onPress={handleAddSection}
                 activeOpacity={0.9}
               >
                 <LinearGradient
