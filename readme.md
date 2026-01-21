@@ -1,167 +1,177 @@
 ![Portfolio](https://img.shields.io/badge/Portfolio-black)
-# 📁 docvault  
 
-A modern, secure document management application built with React Native and Expo. Organize your documents, manage sections, and keep everything in one place with a beautiful dark-themed interface.
+# DocVault 📂
+Secure document and card storage application with family sharing capabilities.
 
-## ✨ Features
+## Table of Contents
 
-### 🔐 Authentication & Security
-- Secure user registration and login
-- Password reset via email
-- Protected routes with automatic redirection
-- Persistent login sessions
-- Row Level Security for data protection
+- [About](#about)
+- [Features](#features)
+- [Tech Stack](#tech-stack)
+- [Project Structure](#project-structure)
+- [Installation](#installation)
+- [Configuration](#configuration)
+- [Build](#build)
+- [Environment Variables](#environment-variables)
+- [Contributing](#contributing)
+- [License](#license)
 
-### 📱 Core Functionality
-- Create custom sections to organize your documents
-- Add and manage cards within each section
-- Beautiful card-based interface
-- Smooth navigation and animations
-- Real-time data synchronization
+## About
 
-### 👤 User Experience
-- Personalized user profile
-- Account information display
-- Customizable preferences
-- Dark mode interface
-- Intuitive tab-based navigation
+DocVault is a React Native mobile application designed for secure storage and management of important documents and cards. The app enables family members to share and control access to sensitive information through a clean, intuitive interface.
 
-### ⚙️ Settings & Preferences
-- View account details
-- Toggle notifications
-- Manage appearance settings
-- Secure sign out with confirmation
-- Version information display
+## Features
 
-## 🛠️ Tech Stack
+- 🔐 Secure document and card storage
+- 👨‍👩‍👧‍👦 Family member management and invitations
+- 🔄 Document sharing with granular access control
+- 📱 Clean and responsive UI
+- 🖼️ Image capture and upload functionality
+- 💾 Persistent local and cloud storage
+- 🔑 Authentication system with password recovery
 
-- **Framework**: React Native with Expo
-- **Navigation**: Expo Router (file-based routing)
-- **Backend**: Supabase
-- **Authentication**: Supabase Auth
-- **Database**: PostgreSQL (Supabase)
-- **UI**: Custom dark theme design system
-- **Platform**: iOS, Android, Web
+## Tech Stack
 
-## 📋 Prerequisites
+### Frontend
+- **React Native** - Mobile framework
+- **Expo** - Development platform
+- **React Navigation** - Navigation library
+- **TypeScript/JavaScript** - Programming languages
 
-Before you begin, ensure you have the following installed:
-- Node.js (v16 or higher)
-- npm or yarn package manager
-- Expo CLI
-- iOS Simulator (for Mac) or Android Studio (for Android development)
-- A Supabase account
+### Backend & Services
+- **Supabase** - Backend as a Service
+  - Authentication
+  - Database (PostgreSQL)
+  - Storage
+  - Real-time subscriptions
 
-## 🚀 Getting Started
+### Build & Deployment
+- **EAS (Expo Application Services)** - Build and deployment
+- **Expo Go** - Development testing
 
-### Installation
-
-1. **Clone the repository**
-   ```bash
-   git clone <your-repo-url>
-   cd docvault 
-   ```
-
-2. **Install dependencies**
-   ```bash
-   npm install
-   ```
-
-3. **Configure Supabase**
-   - Create a new project at [supabase.com](https://supabase.com)
-   - Copy your project URL and anon key
-   - Update the credentials in `config/supabase.js`
-
-4. **Set up the database**
-   - Create the required tables (sections, cards)
-   - Enable Row Level Security policies
-   - Configure authentication settings
-
-5. **Run the application**
-   ```bash
-   npx expo start
-   ```
-   - Press `i` for iOS simulator
-   - Press `a` for Android emulator
-   - Press `w` for web browser
-
-## 📁 Project Structure
+## Project Structure
 
 ```
-docvault /
+DOCVAULT/
 ├── app/
-│   ├── (auth)/           → Authentication screens
-│   ├── (tabs)/           → Main application tabs
-│   ├── _layout.jsx       → Root layout configuration
-│   └── card screens      → Document card management
-├── config/
-│   └── supabase.js       → Backend configuration
-├── services/
-│   └── supabaseService.js → API service layer
-└── assets/               → Images and resources
+│   ├── (auth)/                 # Authentication screens
+│   │   ├── _layout.jsx
+│   │   ├── forgot-password.jsx
+│   │   ├── signin.jsx
+│   │   └── signup.jsx
+│   └── (tabs)/                 # Main app tabs
+│       ├── _layout.jsx
+│       ├── family.jsx
+│       ├── index.jsx
+│       └── settings.jsx
+├── assets/                     # Static assets
+│   ├── adaptive-icon.png
+│   ├── favicon.png
+│   ├── icon.png
+│   └── splash-icon.png
+├── config/                     # Configuration files
+│   └── supabase.js
+├── hooks/                      # Custom React hooks
+│   └── useAuth.js
+├── services/                   # API and service layers
+│   ├── storageService.js
+│   └── supabaseService.js
+├── utils/                      # Utility functions
+│   └── downloadImage.js
+├── card.jsx                    # Card components
+├── cardDetail.jsx
+├── familyCards.jsx
+├── index.jsx
+├── .gitignore
+├── app.json                    # Expo configuration
+├── package.json
+└── README.md
 ```
 
-## 🎨 Design System
+## Installation
 
-### Visual Identity
-- **Modern Dark Theme**: Sophisticated slate-based color palette
-- **Card-Based UI**: Clean, organized interface with rounded corners
-- **Smooth Animations**: Fluid transitions between screens
-- **Consistent Typography**: Clear hierarchy and readability
-- **Intuitive Icons**: Emoji-based visual indicators
+### Prerequisites
 
-### Color Palette
-- Deep slate backgrounds for comfortable viewing
-- Blue accent colors for interactive elements
-- Red highlights for destructive actions
-- Subtle borders and shadows for depth
+- Node.js >= 16.x
+- npm or yarn
+- Expo CLI
+- Android Studio (for Android) or Xcode (for iOS)
 
-## 🔒 Security Features
+### Steps
 
-- End-to-end authentication with Supabase
-- Row Level Security (RLS) policies
-- Secure password reset flow
-- Protected API endpoints
-- User data isolation
-- Session management
+1. Clone the repository
+```bash
+git clone https://github.com/yourusername/docvault.git
+cd docvault
+```
 
-## 📱 Platform Support
+2. Install dependencies
+```bash
+npm install
+```
 
-| Platform | Status |
-|----------|--------|
-| iOS      | ✅ Supported |
-| Android  | ✅ Supported |
-| Web      | ✅ Supported |
+3. Set up environment variables (see [Environment Variables](#environment-variables))
 
-## 🌟 Key Highlights
+4. Start the development server
+```bash
+npx expo start
+```
 
-- **Zero Configuration**: Works out of the box with minimal setup
-- **Type Safety**: Built with best practices and error handling
-- **Responsive Design**: Adapts to different screen sizes
-- **Performance**: Optimized for smooth user experience
-- **Scalable**: Easy to extend with new features
+## Configuration
 
-## 📚 Documentation
+### Supabase Setup
 
-For detailed documentation on:
-- Database schema and tables
-- API endpoints and services
-- Authentication flow
-- Component structure
-- Styling guidelines
+1. Create a project on [Supabase](https://supabase.com)
+2. Set up authentication providers
+3. Create necessary tables and storage buckets
+4. Update `config/supabase.js` with your credentials
 
-Please refer to the inline code comments and documentation files.
+## Build
 
-## 🐛 Known Issues
+### Development Build
 
-Currently, there are no known issues. If you encounter any problems, please open an issue on GitHub.
+```bash
+npx expo start
+```
 
-## 🗺️ Roadmap
+### Production Build (EAS)
 
-- [ ] File upload functionality
-- [ ] Document sharing between users
-- [ ] Advanced search and filtering
-- [ ] Offline mode support
-- [ ] Export functionality
-- [ ] Push notifications
-- [ ] Multi-language support
+```bash
+# Android
+eas build --platform android --profile production
+
+# iOS
+eas build --platform ios --profile production
+```
+
+### Generate APK
+
+```bash
+eas build -p android --profile preview
+```
+
+## Environment Variables
+
+Create a `.env` file in the root directory:
+
+```env
+SUPABASE_URL=your_supabase_url
+SUPABASE_ANON_KEY=your_supabase_anon_key
+```
+
+## Contributing
+
+1. Fork the repository
+2. Create your feature branch (`git checkout -b feature/AmazingFeature`)
+3. Commit your changes (`git commit -m 'Add some AmazingFeature'`)
+4. Push to the branch (`git push origin feature/AmazingFeature`)
+5. Open a Pull Request
+
+## License
+
+This project is licensed under the MIT License - see the LICENSE file for details.
+
+---
+
+**Version:** 1.0.0  
+**Status:** Production Ready
