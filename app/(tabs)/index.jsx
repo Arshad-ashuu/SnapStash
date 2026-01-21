@@ -170,7 +170,7 @@ export default function Home() {
       <SafeAreaView style={styles.container}>
         <View style={styles.header}>
           <View>
-            <Text style={styles.headerText}>SnapStash</Text>
+            <Text style={styles.headerText}>docvault 📂</Text>
             <Text style={styles.headerSubtext}>
               {user ? `${sections.length} sections` : 'Sign in to start'}
             </Text>

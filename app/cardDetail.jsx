@@ -1,10 +1,12 @@
-import { View, Text, StyleSheet, TouchableOpacity, ScrollView, Image, Dimensions, Alert, Modal, TextInput, ActivityIndicator, Pressable } from 'react-native'
+import { View, Text, StyleSheet, TouchableOpacity, ScrollView, Image, Dimensions, Alert, Modal, TextInput, ActivityIndicator, Pressable, Share } from 'react-native'
 import React, { useState, useRef } from 'react'
 import { SafeAreaView } from 'react-native-safe-area-context'
 import { useLocalSearchParams, router } from 'expo-router'
 import { LinearGradient } from 'expo-linear-gradient'
 import { Ionicons } from '@expo/vector-icons'
 import * as ImagePicker from 'expo-image-picker'
+import * as Sharing from 'expo-sharing'
+import * as FileSystem from 'expo-file-system/legacy'
 import { updateCard, deleteCard, getCurrentUser } from '../services/supabaseService'
 import { uploadImage } from '../services/storageService'
 import { downloadImage } from '../utils/downloadImage'
@@ -21,6 +23,8 @@ export default function CardDetail() {
   const [updating, setUpdating] = useState(false)
   const [deleting, setDeleting] = useState(false)
   const scrollViewRef = useRef(null)
+  const [downloading, setDownloading] = useState(false)
+  const [sharing, setSharing] = useState(false)
 
   const handleEdit = () => {
     setEditedName(cardName)
@@ -108,8 +112,118 @@ export default function CardDetail() {
     )
   }
 
-  const handleShare = () => {
-    Alert.alert('Share Document', 'Share functionality coming soon!')
+  const handleDownloadImage = async () => {
+    if (!cardImages[activeImageIndex]) {
+      Alert.alert('Error', 'No image to download')
+      return
+    }
+
+    try {
+      setDownloading(true)
+      await downloadImage(cardImages[activeImageIndex])
+    } catch (error) {
+      console.error('Download failed:', error)
+    } finally {
+      setDownloading(false)
+    }
+  }
+
+  const handleShare = async () => {
+    if (cardImages.length === 0) {
+      Alert.alert('No Images', 'Add some images first to share them!')
+      return
+    }
+
+    // Show options: Share current image or all images
+    Alert.alert(
+      'Share Images',
+      'What would you like to share?',
+      [
+        {
+          text: 'Cancel',
+          style: 'cancel'
+        },
+        {
+          text: 'Current Image',
+          onPress: () => shareCurrentImage()
+        },
+        {
+          text: `All Images (${cardImages.length})`,
+          onPress: () => shareAllImages()
+        }
+      ]
+    )
+  }
+
+  const shareCurrentImage = async () => {
+    try {
+      setSharing(true)
+      const imageUrl = cardImages[activeImageIndex]
+      
+      // Check if sharing is available
+      const isAvailable = await Sharing.isAvailableAsync()
+      if (!isAvailable) {
+        // Fallback to native Share API
+        await Share.share({
+          message: `Check out this image from ${cardName}!`,
+          url: imageUrl,
+          title: cardName
+        })
+        return
+      }
+
+      // Download image to local storage
+      const timestamp = Date.now()
+      const extension = imageUrl.split('.').pop()?.split('?')[0] || 'jpg'
+      const filename = `${cardName}_${timestamp}.${extension}`
+      const fileUri = `${FileSystem.documentDirectory}${filename}`
+
+      console.log('Downloading image for sharing...')
+      const downloadResult = await FileSystem.downloadAsync(imageUrl, fileUri)
+
+      if (downloadResult.status === 200) {
+        // Share the local file
+        await Sharing.shareAsync(downloadResult.uri, {
+          mimeType: `image/${extension}`,
+          dialogTitle: `Share ${cardName}`,
+          UTI: `public.${extension}`
+        })
+
+        // Clean up temp file
+        try {
+          await FileSystem.deleteAsync(fileUri, { idempotent: true })
+        } catch (cleanupError) {
+          console.log('Cleanup skipped:', cleanupError)
+        }
+      } else {
+        throw new Error('Failed to download image')
+      }
+    } catch (error) {
+      console.error('Share failed:', error)
+      Alert.alert('Share Failed', 'Unable to share image. Please try again.')
+    } finally {
+      setSharing(false)
+    }
+  }
+
+  const shareAllImages = async () => {
+    try {
+      setSharing(true)
+      
+      // For multiple images, we'll share via text with URLs
+      const imageList = cardImages.map((url, index) => `Image ${index + 1}: ${url}`).join('\n\n')
+      const message = `${cardName}\n\n${cardImages.length} images from docvault :\n\n${imageList}`
+      
+      await Share.share({
+        message: message,
+        title: `${cardName} - ${cardImages.length} Images`
+      })
+    } catch (error) {
+      console.error('Share all failed:', error)
+      Alert.alert('Share Failed', 'Unable to share images. Please try again.')
+    } finally {
+      setSharing(false)
+    }
   }
 
   const openImageViewer = (index) => {
@@ -159,8 +273,16 @@ export default function CardDetail() {
               <Text style={styles.breadcrumbText}>{sectionTitle}</Text>
             </View>
           </View>
-          <TouchableOpacity style={styles.shareButton} onPress={handleShare}>
-            <Ionicons name="share-outline" size={22} color="#fff" />
+          <TouchableOpacity 
+            style={styles.shareButton} 
+            onPress={handleShare}
+            disabled={sharing || cardImages.length === 0}
+          >
+            {sharing ? (
+              <ActivityIndicator size={22} color="#fff" />
+            ) : (
+              <Ionicons name="share-outline" size={22} color={cardImages.length === 0 ? '#64748b' : '#fff'} />
+            )}
           </TouchableOpacity>
         </View>
 
@@ -170,31 +292,6 @@ export default function CardDetail() {
           showsVerticalScrollIndicator={false}
           contentContainerStyle={styles.scrollContent}
         >
-          {/* Stats Overview */}
-          {/* <View style={styles.statsRow}>
-            <View style={styles.statCard}>
-              <LinearGradient
-                colors={['rgba(167, 139, 250, 0.15)', 'rgba(139, 92, 246, 0.05)']}
-                style={styles.statGradient}
-              >
-                <Ionicons name="images" size={24} color="#a78bfa" />
-                <Text style={styles.statNumber}>{cardImages.length}</Text>
-                <Text style={styles.statLabel}>Images</Text>
-              </LinearGradient>
-            </View>
-            
-            <View style={styles.statCard}>
-              <LinearGradient
-                colors={['rgba(167, 139, 250, 0.15)', 'rgba(139, 92, 246, 0.05)']}
-                style={styles.statGradient}
-              >
-                <Ionicons name="folder-open" size={24} color="#a78bfa" />
-                <Text style={styles.statNumber}>1</Text>
-                <Text style={styles.statLabel}>Category</Text>
-              </LinearGradient>
-            </View>
-          </View> */}
-
           {/* Images Gallery */}
           {cardImages.length > 0 ? (
             <View style={styles.gallerySection}>
@@ -373,36 +470,54 @@ export default function CardDetail() {
               <TouchableOpacity 
                 style={styles.actionCard} 
                 onPress={handleShare}
+                disabled={sharing || cardImages.length === 0}
               >
                 <LinearGradient
                   colors={['rgba(59, 130, 246, 0.15)', 'rgba(37, 99, 235, 0.05)']}
                   style={styles.actionGradient}
                 >
                   <View style={styles.actionIconCircle}>
-                    <Ionicons name="share-social" size={22} color="#3b82f6" />
+                    {sharing ? (
+                      <ActivityIndicator size={22} color="#3b82f6" />
+                    ) : (
+                      <Ionicons name="share-social" size={22} color="#3b82f6" />
+                    )}
                   </View>
-                  <Text style={styles.actionText}>Share</Text>
-                  <Text style={styles.actionSubtext}>Coming soon</Text>
+                  <Text style={styles.actionText}>
+                    {sharing ? 'Sharing...' : 'Share'}
+                  </Text>
+                  <Text style={styles.actionSubtext}>
+                    {cardImages.length === 0 ? 'No images' : 'To other apps'}
+                  </Text>
                 </LinearGradient>
               </TouchableOpacity>
 
               <TouchableOpacity 
                 style={styles.actionCard} 
-                onPress={() => downloadImage(cardImages[activeImageIndex])}
+                onPress={handleDownloadImage}
+                disabled={downloading || cardImages.length === 0}
               >
                 <LinearGradient
                   colors={['rgba(16, 185, 129, 0.15)', 'rgba(5, 150, 105, 0.05)']}
                   style={styles.actionGradient}
                 >
                   <View style={styles.actionIconCircle}>
-                    <Ionicons name="download" size={22} color="#10b981" />
+                    {downloading ? (
+                      <ActivityIndicator size={22} color="#10b981" />
+                    ) : (
+                      <Ionicons name="download" size={22} color="#10b981" />
+                    )}
                   </View>
-                  <Text style={styles.actionText}>Download</Text>
-                  <Text style={styles.actionSubtext}>Coming soon</Text>
+                  <Text style={styles.actionText}>
+                    {downloading ? 'Downloading...' : 'Download'}
+                  </Text>
+                  <Text style={styles.actionSubtext}>
+                    {cardImages.length === 0 ? 'No images' : 'Save to gallery'}
+                  </Text>
                 </LinearGradient>
               </TouchableOpacity>
 
-              <TouchableOpacity 
+              {/* <TouchableOpacity 
                 style={styles.actionCard} 
                 onPress={() => Alert.alert('Print', 'Print to PDF coming soon!')}
               >
@@ -416,7 +531,7 @@ export default function CardDetail() {
                   <Text style={styles.actionText}>Print PDF</Text>
                   <Text style={styles.actionSubtext}>Coming soon</Text>
                 </LinearGradient>
-              </TouchableOpacity>
+              </TouchableOpacity> */}
             </View>
           </View>
         </ScrollView>

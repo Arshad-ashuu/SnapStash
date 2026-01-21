@@ -1,5 +1,5 @@
 ![Portfolio](https://img.shields.io/badge/Portfolio-black)
-# 📁 SnapStash 
+# 📁 docvault  
 
 A modern, secure document management application built with React Native and Expo. Organize your documents, manage sections, and keep everything in one place with a beautiful dark-themed interface.
 
@@ -59,7 +59,7 @@ Before you begin, ensure you have the following installed:
 1. **Clone the repository**
    ```bash
    git clone <your-repo-url>
-   cd SnapStash
+   cd docvault 
    ```
 
 2. **Install dependencies**
@@ -88,7 +88,7 @@ Before you begin, ensure you have the following installed:
 ## 📁 Project Structure
 
 ```
-SnapStash/
+docvault /
 ├── app/
 │   ├── (auth)/           → Authentication screens
 │   ├── (tabs)/           → Main application tabs

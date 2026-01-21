@@ -1,9 +1,9 @@
 {
   "expo": {
-    "name": "SnapStash",
-    "slug": "SnapStash",
+    "name": "docvault ",
+    "slug": "docvault",
     "version": "1.0.0",
-    "scheme": "SnapStash",
+    "scheme": "docvault ",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "light",
@@ -16,8 +16,8 @@
     "ios": {
       "supportsTablet": true,
       "infoPlist": {
-        "NSPhotoLibraryUsageDescription": "Allow SnapStash to save images to your photo library.",
-        "NSPhotoLibraryAddUsageDescription": "Allow SnapStash to save images to your photo library."
+        "NSPhotoLibraryUsageDescription": "Allow docvault  to save images to your photo library.",
+        "NSPhotoLibraryAddUsageDescription": "Allow docvault  to save images to your photo library."
       }
     },
     "android": {
@@ -26,11 +26,19 @@
         "backgroundColor": "#ffffff"
       },
       "permissions": [
-        "READ_EXTERNAL_STORAGE",
-        "WRITE_EXTERNAL_STORAGE",
-        "READ_MEDIA_IMAGES"
+        "READ_MEDIA_IMAGES",
+        "READ_MEDIA_VIDEO",
+        "ACCESS_MEDIA_LOCATION",
+        "android.permission.READ_EXTERNAL_STORAGE",
+        "android.permission.WRITE_EXTERNAL_STORAGE",
+        "android.permission.READ_MEDIA_VISUAL_USER_SELECTED",
+        "android.permission.ACCESS_MEDIA_LOCATION",
+        "android.permission.READ_MEDIA_IMAGES",
+        "android.permission.READ_MEDIA_VIDEO",
+        "android.permission.READ_MEDIA_AUDIO"
       ],
-      "edgeToEdgeEnabled": true
+      "edgeToEdgeEnabled": true,
+      "package": "com.arshad0110.docvault"
     },
     "web": {
       "favicon": "./assets/favicon.png"
@@ -40,11 +48,18 @@
       [
         "expo-media-library",
         {
-          "photosPermission": "Allow SnapStash to save photos to your gallery.",
-          "savePhotosPermission": "Allow SnapStash to save photos to your gallery.",
+          "photosPermission": "Allow docvault  to save photos to your gallery.",
+          "savePhotosPermission": "Allow docvault  to save photos to your gallery.",
           "isAccessMediaLocationEnabled": true
         }
       ]
-    ]
+    ],
+    "extra": {
+      "router": {},
+      "eas": {
+        "projectId": "dac5c106-9b8d-4962-9435-55d572a13fe7"
+      }
+    },
+    "owner": "arshad0110"
   }
 }

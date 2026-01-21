@@ -42,7 +42,7 @@ export default function Index() {
       >
         <View style={styles.loadingContainer}>
           <Ionicons name="document-text-outline" size={56} color="#fff" />
-          <Text style={styles.loadingText}>SnapStash</Text>
+          <Text style={styles.loadingText}>docvault </Text>
           <Text style={styles.loadingSubtext}>Loading...</Text>
         </View>
       </LinearGradient>
@@ -85,7 +85,7 @@ export default function Index() {
                   <Ionicons name="flash" size={16} color="#fbbf24" />
                 </View>
               </View>
-              <Text style={styles.brandName}>SnapStash</Text>
+              <Text style={styles.brandName}>docvault </Text>
               <Text style={styles.tagline}>Your Emergency Document Vault</Text>
             </View>
 
